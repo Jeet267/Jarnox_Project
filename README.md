@@ -104,8 +104,3 @@ The backend exposes a clean RESTful interface for all data operations:
 
 ---
 
-## 👤 Submission
-
-**Candidate**: Abhijeet Kumar Shah
-**Role**: Python/Backend Developer Internship — Jarnox
-**Deadline**: April 2026
