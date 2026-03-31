@@ -12,6 +12,7 @@ import numpy as np
 import os
 from datetime import datetime, timedelta
 from typing import Optional
+import logging
 from data.fetch_data import fetch_and_store # Import for self-healing
 try:
     from sklearn.linear_model import LinearRegression
@@ -112,14 +113,15 @@ def list_stocks():
     conn = get_conn()
     try:
         rows = conn.execute("SELECT symbol, company_name FROM stocks ORDER BY symbol").fetchall()
+        print(f"DEBUG: Found {len(rows)} stocks in DB.")
         # SELF-HEALING: If DB is empty, fetch data automatically
         if not rows:
             print("⚠️ Database empty! Triggering auto-fetch...")
             fetch_and_store()
             rows = conn.execute("SELECT symbol, company_name FROM stocks ORDER BY symbol").fetchall()
-    except sqlite3.OperationalError:
-        # Table might not exist yet
-        print("⚠️ Tables missing! Triggering auto-fetch...")
+            print(f"DEBUG: After fetch, found {len(rows)} stocks.")
+    except Exception as e:
+        print(f"ERROR in list_stocks: {e}")
         fetch_and_store()
         rows = conn.execute("SELECT symbol, company_name FROM stocks ORDER BY symbol").fetchall()
     
