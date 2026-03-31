@@ -10,6 +10,6 @@ COPY . .
 # Fetch stock data on first run (baked in)
 RUN python data/fetch_data.py || true
 
-EXPOSE 8000
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the application
+# Render provides a $PORT environment variable
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-10000}"]
