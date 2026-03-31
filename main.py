@@ -12,6 +12,7 @@ import numpy as np
 import os
 from datetime import datetime, timedelta
 from typing import Optional
+from data.fetch_data import fetch_and_store # Import for self-healing
 try:
     from sklearn.linear_model import LinearRegression
     SKLEARN_AVAILABLE = True
@@ -109,9 +110,32 @@ def list_stocks():
     Database mein available sabhi stocks return karta hai.
     """
     conn = get_conn()
-    rows = conn.execute("SELECT symbol, company_name FROM stocks ORDER BY symbol").fetchall()
+    try:
+        rows = conn.execute("SELECT symbol, company_name FROM stocks ORDER BY symbol").fetchall()
+        # SELF-HEALING: If DB is empty, fetch data automatically
+        if not rows:
+            print("⚠️ Database empty! Triggering auto-fetch...")
+            fetch_and_store()
+            rows = conn.execute("SELECT symbol, company_name FROM stocks ORDER BY symbol").fetchall()
+    except sqlite3.OperationalError:
+        # Table might not exist yet
+        print("⚠️ Tables missing! Triggering auto-fetch...")
+        fetch_and_store()
+        rows = conn.execute("SELECT symbol, company_name FROM stocks ORDER BY symbol").fetchall()
+    
     conn.close()
     return [dict(r) for r in rows]
+
+@app.get("/refresh-data", tags=["Market"], summary="Force refresh stock data")
+def force_refresh():
+    """
+    Manually triggers the fetch_data script to update the database.
+    """
+    try:
+        fetch_and_store()
+        return {"status": "success", "message": "Data refreshed successfully!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ─────────────────────────────────────────────
