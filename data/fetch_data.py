@@ -109,18 +109,24 @@ def fetch_and_store(period="1y"):
                 print(f"⚠️  No live data for {symbol}. Generating Mock Data...")
                 # Generate 90 days of realistic mock data
                 dates = pd.date_range(end=datetime.now(), periods=90)
-                base_price = 1000 + np.random.uniform(-200, 200)
+                prev_close = 1000 + np.random.uniform(-200, 200)
                 mock_data = []
                 for d in dates:
-                    base_price *= (1 + np.random.uniform(-0.02, 0.02))
+                    daily_change = np.random.normal(0, 0.015) # 1.5% standard dev
+                    open_price = prev_close * (1 + np.random.normal(0, 0.005))
+                    close_price = open_price * (1 + daily_change)
+                    high_price = max(open_price, close_price) * (1 + abs(np.random.normal(0, 0.005)))
+                    low_price = min(open_price, close_price) * (1 - abs(np.random.normal(0, 0.005)))
+                    
                     mock_data.append({
                         "Date": d,
-                        "Open": base_price * 0.99,
-                        "High": base_price * 1.02,
-                        "Low": base_price * 0.98,
-                        "Close": base_price,
-                        "Volume": np.random.randint(100000, 1000000)
+                        "Open": open_price,
+                        "High": high_price,
+                        "Low": low_price,
+                        "Close": close_price,
+                        "Volume": np.random.randint(500000, 5000000)
                     })
+                    prev_close = close_price
                 data = pd.DataFrame(mock_data)
                 data.set_index("Date", inplace=True)
 
