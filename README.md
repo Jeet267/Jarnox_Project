@@ -4,18 +4,18 @@ A professional, full-stack **financial data platform** built with **FastAPI + SQ
 
 ---
 
-## 🌟 Advanced Technical Showcase (Part 4)
+ Advanced Technical Showcase (Part 4)
 
-To go beyond the basics, this project implements all "Optional Add-ons" requested for outstanding applicants:
+To go beyond the basics, I have implemented advanced features in this project.
 
-- **🧠 AI/ML Forecasting**: Integrated a **Linear Regression** model via `scikit-learn` to predict future price trends based on historical OHLCV data.
-- **⚡ Async API Handling**: Built using **FastAPI** to handle concurrent requests asynchronously, ensuring a non-blocking and super-fast user experience.
-- **🐳 Dockerization**: Fully containerized with `Dockerfile` and `docker-compose.yml` for seamless multi-platform deployment.
-- **☁️ Deployment Ready**: Optimized for hosting on **Render**, **Oracle Cloud**, or **GitHub Pages** (static frontend).
+ AI/ML Forecasting**: Integrated a **Linear Regression** model via `scikit-learn` to predict future price trends based on historical OHLCV data.
+ Async API Handling**: Built using **FastAPI** to handle concurrent requests asynchronously, ensuring a non-blocking and super-fast user experience.
+ Dockerization**: Fully containerized with `Dockerfile` and `docker-compose.yml` for seamless multi-platform deployment.
+Deployment Ready**: Optimized for hosting on **Render**, **Oracle Cloud**, or **GitHub Pages** (static frontend).
 
 ---
 
-## 🚀 Core Features
+ Core Features
 
 | Feature | Detail |
 |---|---|
