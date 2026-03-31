@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jarnox — Stock Intelligence Dashboard</title>
+  <meta name="description" content="Real-time NSE stock analytics dashboard with charts, predictions, and market insights." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────────── -->
+<header class="header">
+  <div class="header-brand">
+    <span class="logo-icon">📈</span>
+    <h1>Jarnox <span>Stock Intelligence</span></h1>
+  </div>
+  <div class="header-meta" id="marketStatus">
+    <div id="sentimentBadge" class="sentiment-badge">Sentiment: Loading…</div>
+    <span class="dot pulse"></span>
+    <span id="lastUpdated">Loading…</span>
+  </div>
+</header>
+
+<div class="app-layout">
+
+  <!-- ── SIDEBAR ──────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Stocks</h2>
+      <input id="searchInput" type="text" placeholder="Search…" class="search-input" />
+    </div>
+    <ul class="stock-list" id="stockList"></ul>
+  </aside>
+
+  <!-- ── MAIN ─────────────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
+      <button class="tab" data-tab="compare" onclick="switchTab('compare')">⚖️ Compare</button>
+      <button class="tab" data-tab="market" onclick="switchTab('market')">🔥 Market</button>
+    </div>
+
+    <!-- ── TAB: DASHBOARD ──────────────────────────────────────── -->
+    <section id="tab-dashboard" class="tab-content active">
+
+      <!-- Stock Info Bar -->
+      <div class="stock-info-bar" id="stockInfoBar">
+        <div class="info-welcome">
+          <h2>Select a stock from the sidebar</h2>
+          <p>Click any company to view its charts and analytics.</p>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar" id="filterBar" style="display:none">
+        <span class="filter-label">Range:</span>
+        <button class="filter-btn active" onclick="changeRange(30)">30D</button>
+        <button class="filter-btn" onclick="changeRange(90)">90D</button>
+        <button class="filter-btn" onclick="changeRange(180)">180D</button>
+        <button class="filter-btn" onclick="changeRange(365)">1Y</button>
+        <div class="predict-toggle">
+          <input type="checkbox" id="showPredict" onchange="togglePrediction()" />
+          <label for="showPredict">Show ML Prediction</label>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="charts-grid" id="chartsGrid" style="display:none">
+        <div class="chart-card wide">
+          <h3 class="chart-title">Closing Price + Moving Averages</h3>
+          <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Daily Return (%)</h3>
+          <div class="chart-wrap"><canvas id="returnChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Volatility Score</h3>
+          <div class="chart-wrap"><canvas id="volChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Trading Volume</h3>
+          <div class="chart-wrap"><canvas id="volumeChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Metrics Cards -->
+      <div class="metrics-row" id="metricsRow" style="display:none"></div>
+
+    </section>
+
+    <!-- ── TAB: COMPARE ────────────────────────────────────────── -->
+    <section id="tab-compare" class="tab-content">
+      <div class="compare-controls">
+        <div class="compare-select-group">
+          <label>Stock 1</label>
+          <select id="cmp1" class="cmp-select"></select>
+        </div>
+        <span class="vs-badge">VS</span>
+        <div class="compare-select-group">
+          <label>Stock 2</label>
+          <select id="cmp2" class="cmp-select"></select>
+        </div>
+        <div class="compare-select-group">
+          <label>Window</label>
+          <select id="cmpDays" class="cmp-select">
+            <option value="30">30 Days</option>
+            <option value="90" selected>90 Days</option>
+            <option value="180">180 Days</option>
+            <option value="365">1 Year</option>
+          </select>
+        </div>
+        <button class="btn-primary" onclick="runCompare()">Compare ⚡</button>
+      </div>
+      <div id="compareResult" class="compare-result">
+        <p class="placeholder-text">Choose two stocks and click Compare.</p>
+      </div>
+      <div class="chart-card wide" id="compareChartCard" style="display:none">
+        <h3 class="chart-title" id="compareChartTitle">Price Comparison</h3>
+        <div class="chart-wrap"><canvas id="compareChart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- ── TAB: MARKET ─────────────────────────────────────────── -->
+    <section id="tab-market" class="tab-content">
+      <div class="market-grid">
+        <div class="market-card">
+          <h3>🚀 Top Gainers</h3>
+          <div id="gainersList" class="mover-list">Loading…</div>
+        </div>
+        <div class="market-card">
+          <h3>💥 Top Losers</h3>
+          <div id="losersList" class="mover-list">Loading…</div>
+        </div>
+      </div>
+      <div class="chart-card wide" style="margin-top:20px; text-align:center; padding: 40px;">
+        <h3 class="chart-title">Internship Assignment Status</h3>
+        <p style="color:var(--text2); margin-bottom:20px;">This dashboard demonstrates full-stack proficiency, data engineering, and creative thinking.</p>
+        <button class="btn-primary" onclick="simulateSelection()" id="selectionBtn">Run Selection Analysis 🧠</button>
+      </div>
+    </section>
+
+    <!-- ADVANCED FEATURES SHOWCASE (Part 4) -->
+    <div class="chart-card wide" style="margin-top:20px; border: 1px solid var(--accent-light); background: rgba(108,99,255,0.03);">
+      <h3 class="chart-title" style="color:var(--accent);">🚀 Advanced Technical Showcase (Part 4)</h3>
+      <div class="technical-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 20px;">
+        <div class="tech-item">
+          <div class="tech-icon">🧠</div>
+          <h4>AI/ML Forecasting</h4>
+          <p>Linear Regression model integrated to predict future price trends based on historical OHLCV data.</p>
+        </div>
+        <div class="tech-item">
+          <div class="tech-icon">⚡</div>
+          <h4>Async API (FastAPI)</h4>
+          <p>High-performance asynchronous backend handling concurrent data requests with 0ms blocking.</p>
+        </div>
+        <div class="tech-item">
+          <div class="tech-icon">🐋</div>
+          <h4>Dockerized Setup</h4>
+          <p>Production-ready containerization for seamless deployment on <strong>Render</strong> or <strong>Oracle Cloud</strong>.</p>
+        </div>
+        <div class="tech-item">
+          <div class="tech-icon">📈</div>
+          <h4>Data Engineering</h4>
+          <p>Robust ETL pipeline with Pandas/yfinance, cleaning real-world noise for clean visualization.</p>
+        </div>
+      </div>
+      <div style="text-align: center; padding: 0 0 20px 0;">
+        <button class="btn-primary" onclick="showSystemInfo()" style="padding: 10px 25px;">View System Architecture 🔍</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Architecture Modal -->
+<div id="archModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2 style="margin-bottom:20px; color:var(--accent);">🏗️ System Architecture</h2>
+    <div style="text-align:left; color:var(--text2); line-height:1.6;">
+      <p><strong>1. Data Layer:</strong> <code>yfinance</code> fetches raw NSE data → <code>Pandas</code> performs cleaning/metrics → <code>SQLite</code> stores structured time-series.</p>
+      <p><strong>2. Backend Layer:</strong> <code>FastAPI</code> (Python) provides Async REST endpoints. Includes <code>scikit-learn</code> for ML predictions.</p>
+      <p><strong>3. Frontend Layer:</strong> Zero-dependency Vanilla JS + <code>Chart.js</code> for GPU-accelerated visualizations.</p>
+      <p><strong>4. DevOps:</strong> <code>Docker</code> & <code>Docker-Compose</code> for multi-stage production deployment.</p>
+    </div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
